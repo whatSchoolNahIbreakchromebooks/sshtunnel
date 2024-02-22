@@ -1,0 +1,12 @@
+{
+  "name": "ssh-reverse-tunnel",
+  "version": "1.0.0",
+  "description": "SSH reverse tunnel setup for your Node.js app",
+  "main": "server.js", // Replace with your actual script filename
+  "scripts": {
+    "start": "node server.js" // Command to start your script
+  },
+  "dependencies": {
+    "ssh2": "^1.10.0" // Add any other dependencies your script requires
+  }
+}
