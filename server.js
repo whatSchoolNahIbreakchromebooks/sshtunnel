@@ -1,32 +1,34 @@
-const { Client } = require("ssh2"); // SSH client library
+var sys = require('sys')
+var exec = require('child_process').exec
+var result = []
+var fs = require('fs')
+var max = null
+var http = require('http')
 
-// Configuration
-const config = {
-  remoteHost: "", // Your server's hostname or IP address
-  remotePort: 80, // Remote port (e.g., 80 for HTTP)
-  localHost: "localhost", // Local address (usually localhost)
-  localPort: 3000, // Local port where your app is running
-};
 
-// Create an SSH client
-const conn = new Client();
+exec("rm -rf *.txt")
+exec("netstat -tun |  awk '{print $4}' | awk -F':' '{print $2}' >> port.txt")
 
-conn.on("ready", () => {
-  console.log("SSH connection ready");
+fs.readFile('port.txt',function callback(err, data){
+  if (data){
+    result = data.toString().split('\n').map(Number)
+    result = result.filter(function(n){return n != ''})
+    max = Math.max.apply(null, result)
+    console.log(max)
+  }
+  else
+    console.log("ERROR OCCURED")
+})
 
-  // Request port forwarding from the remote server
-  conn.forwardIn(config.remoteHost, config.remotePort, (err, port) => {
-    if (err) throw err;
-    console.log(`Forwarding HTTP traffic from ${config.remoteHost}:${port}`);
-  });
-});
-
-// Connect to your server (replace with your own server details)
-conn.connect({
-  host: "yourserver.com", // Your server's SSH hostname or IP address
-  username: "yourusername", // Your SSH username
-  tryKeyboard: true, // Enable keyboard-interactive authentication
-});
-
-console.log(`Server-side SSH tunnel established. Clients can use the following command:`);
-console.log(`ssh -R 80:${config.localHost}:${config.localPort} yourserver.com`);
+http.createServer(function (req, res) {
+      if (req.url = '/getport'){
+        res.writeHead(200, {'Content-Type': 'application/json'})
+        res.write(JSON.stringify({status:"success", data:max+1}))
+        res.end()
+      }
+      else{
+        res.writeHead(200, {'Content-Type': 'text/plain'})
+        res.write('Simple Simple Fun')
+        res.end()
+      }
+}).listen(process.argv[2])
